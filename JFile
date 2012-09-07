@@ -16,7 +16,10 @@ src_dir './src'
 #
 bundle 'bootic_cart.js' do
   license 'license.txt'
+  file 'head.js'
+  file 'events.js'
   file 'bootic_cart.js'
+  file 'foot.js'
 end
 
 # Optional post-bundling filter, for example for string substitution
