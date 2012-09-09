@@ -37,13 +37,19 @@ var Bootic = Bootic || {};
 //     MyObject.bind('foo', function (evt, i) { alert(i)})
 //     MyObject.trigger('foo', [1])
 var Events = {
+  track: function (eventName) {
+    if('Bootic' in window && 'track' in window.Bootic) {
+      Bootic.track('Bootic.Cart:' + eventName)
+    }
+  },
+  
   bind: function (eventName, fn) {
     $(this).bind(eventName, fn)
     return this
   },
   
   trigger: function (eventName, data) {
-    console.log('trigger', eventName, data)
+    this.track(eventName)
     $(this).trigger(eventName, data)
     return this
   }
@@ -251,4 +257,68 @@ Cart.prototype = {
 $.extend(Cart.prototype, Events);
 
 Bootic.Cart = new Cart();
+// HTML data API (jQuery plugin)
+// ==============================
+
+$(function () {
+  
+  function get(productId) {
+    return $('form[data-bootic-productId="'+ productId +'"]')
+  }
+  
+  Bootic.Cart
+  
+    .bind('added', function (evt, item) {
+      get(item.product_id).trigger('added.bootic', [item])
+    })
+    .bind('removed', function (evt, item) {
+      get(item.product_id).trigger('removed.bootic', [item])
+    })
+    .bind('loaded', function (evt, cart) {
+      cart.forEach(function (item) {
+        get(item.product_id).trigger('added.bootic', [item])
+      })
+    })
+  
+  
+  $('form[data-bootic-cart-add]')
+    .on('added.bootic', function (evt, item) {
+      $(this).addClass('bootic_cart_added')
+    })
+    .on('removed.bootic', function (evt, item) {
+      $(this).removeClass('bootic_cart_added')
+    })
+    .on('submit', function () {
+    
+      var $e = $(this),
+          productId = $e.find('input[name="cart_item[product_id]"]').val(),
+          variantInput = $e.find('input[name="cart_item[variant_id]"]'),
+          qtyIput = $e.find('input[name="cart_item[quantity]"]');
+      
+      var options = {
+        type: $e.attr('method'),
+        url: $e.attr('action')
+      }
+      
+      if(variantInput.length > 0) options['variant_id'] = variantInput.val()
+      if(qtyIput.length > 0) options['quantity'] = qtyIput.val()
+      
+      $e.trigger('adding.bootic')
+      Bootic.Cart.add(productId, function (item) {
+        $e.trigger('added.bootic', [item])
+      }, options)
+      
+      return false
+          
+    })
+    
+  $.fn.booticTemplateRender = function (data) {
+    var $t = $(this);
+    for(var propName in data) {
+      $t.find('[data-bind="' + propName + '"]').text(data[propName])
+    }
+    return $t
+  }
+  
+})
 })(window, jQuery);
