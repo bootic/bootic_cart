@@ -43,6 +43,33 @@ Bootic.cart.bind('added', function (addedItem) {
 Bootic.Cart.add(123)
 ```
 
+### Removing a product
+
+```javascript
+Bootic.Cart.remove(123, function (removedItem) {
+	console.log( removedItem.vendor ) // ie. 'Apple'
+})
+```
+
+```javascript
+Bootic.cart.bind('removed', function (removedItem) {
+	console.log( removedItem.vendor ) // ie. 'Apple'
+})
+
+Bootic.Cart.remove(123)
+```
+
+More in [the source code](/bootic/bootic_cart/blob/master/src/bootic_cart.js).
+
+## Contributing
+
+Use jBundle on dev mode. [Learn more](https://github.com/ismasan/jbundle).
+
+Jasmine tests in [/bootic/bootic_cart/blob/master/test/tests.js](/bootic/bootic_cart/blob/master/test/tests.js)
+    
+    $ jbundle s
+    $ open test/index.html
+
 ## License
 
 bootic_cart.js
