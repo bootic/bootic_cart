@@ -1,6 +1,6 @@
 /*  bootic_cart.js, version <VERSION>
 
-Copyright (c) 2012 [your name here]
+Copyright (c) 2012 Ismael Celis for Bootic S.P.A. (http://bootic.net)
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
