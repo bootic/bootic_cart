@@ -19,6 +19,7 @@ bundle 'bootic_cart.js' do
   file 'head.js'
   file 'events.js'
   file 'bootic_cart.js'
+  file 'html_data_api.js'
   file 'foot.js'
 end
 

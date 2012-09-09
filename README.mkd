@@ -61,6 +61,17 @@ Bootic.Cart.remove(123)
 
 More in [the source code](/bootic/bootic_cart/blob/master/src/bootic_cart.js).
 
+## HTML5 Data API
+
+bootic_cart.js will automatically hook itself up to forms with the following attributes:
+
+```html
+<form class="add_to_cart" action="{{ add_to_cart_url }}" method="post" data-bootic-cart-add="add" data-bootic-productId="{{ product_item.id }}"> 
+  <input type="hidden" name="cart_item[product_id]" value="{{ product_item.id }}" />
+  <input type="submit" value="Add to cart" />    
+</form><!--/form-->
+```
+
 ## Contributing
 
 Use jBundle on dev mode. [Learn more](https://github.com/ismasan/jbundle).
