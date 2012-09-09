@@ -5,6 +5,7 @@ var Events = {
   },
   
   trigger: function (eventName, data) {
+    console.log('trigger', eventName, data)
     $(this).trigger(eventName, data)
     return this
   }
