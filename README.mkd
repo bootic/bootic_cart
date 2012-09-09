@@ -36,7 +36,7 @@ Bootic.Cart.add(123, function (addedItem) {
 ```
 
 ```javascript
-Bootic.cart.bind('added', function (addedItem) {
+Bootic.Cart.bind('added', function (addedItem) {
 	console.log( addedItem.vendor ) // ie. 'Apple'
 })
 
@@ -52,7 +52,7 @@ Bootic.Cart.remove(123, function (removedItem) {
 ```
 
 ```javascript
-Bootic.cart.bind('removed', function (removedItem) {
+Bootic.Cart.bind('removed', function (removedItem) {
 	console.log( removedItem.vendor ) // ie. 'Apple'
 })
 
