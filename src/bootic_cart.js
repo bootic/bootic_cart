@@ -1,4 +1,4 @@
-// Cart private constructor
+// Cart constructor
 // =========================
 var Cart = function () {
   this.reset(true)
@@ -7,7 +7,7 @@ var Cart = function () {
 Cart.prototype = {
   
   // Load server cart data
-  // =====================
+  // -----------------------
   // 
   //  Takes:
   //
@@ -30,7 +30,7 @@ Cart.prototype = {
   },
   
   // Reset client-side cart
-  // =======================
+  // -----------------------
   // 
   // Resets product list and totals. Called on instantiation and useful for testing.
   
@@ -46,7 +46,7 @@ Cart.prototype = {
   },
   
   // Add a product to the cart
-  // ==========================
+  // ---------------------------
   //
   // Increments quantity if product already in the cart
   //
@@ -105,7 +105,7 @@ Cart.prototype = {
   },
   
   // Find a product by product ID
-  // ============================
+  // ------------------------------
   
   find: function (productId, fn) {
     var match = null;
@@ -131,7 +131,7 @@ Cart.prototype = {
   },
   
   // Remove a product by product id
-  // ===============================
+  // ------------------------------
   //
   // Takes:
   //
@@ -184,7 +184,7 @@ Cart.prototype = {
   },
   
   // Is the cart empty?
-  // =====================
+  // -------------------
   isEmpty: function () {
     return !this.products || this.products.length < 1
   },
