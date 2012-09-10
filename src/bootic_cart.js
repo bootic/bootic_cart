@@ -104,9 +104,9 @@ Cart.prototype = {
     this.forEach(function (item) {
       if(item.product_id == productId){
         match = item
-        if(fn) fn(item)
       }
     })
+    if(fn) fn(match)
     return match
   },
   

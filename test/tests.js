@@ -200,5 +200,42 @@ describe("Bootic.Cart", function() {
        expect(called.vendor).toBe('Acme')
     })
   })
+  
+  describe('.find()', function () {
+    beforeEach(function () {
+      Bootic.Cart.update(this.cartResponse)
+    })
+    
+    describe('sync', function () {
+      it('finds items by product id', function () {
+        var item = Bootic.Cart.find(123)
+        expect(item.model).toBe('iPod')
+      })
+    
+      it('returns null if item not found', function () {
+        var item = Bootic.Cart.find(12333)
+        expect(item).toBeNull()
+      })      
+    })
+    
+    describe('async', function () {
+      it('finds items by product id', function () {
+        var found;
+        var item = Bootic.Cart.find(123, function (item) {
+          found = item
+        })
+        expect(found.model).toBe('iPod')
+      })
+      
+      it('returns null if item not found', function () {
+        var found = 1;
+        var item = Bootic.Cart.find(12333, function (item) {
+          found = item
+        })
+        expect(found).toBeNull()
+      })
+    })
+    
+  })
 
 });
