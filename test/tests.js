@@ -82,6 +82,18 @@ describe("Bootic.Cart", function() {
                                        
       expect(called).toBe(Bootic.Cart)
     })
+    
+    it('triggers handlers for "updated"', function () {
+      var called = 0;
+      var handler = function (evt) { called = true }
+      
+      Bootic.Cart.bind('updated', handler)
+      Bootic.Cart.load()
+      this.requests[0].respond(200, { "Content-Type": "application/json" },
+                                       JSON.stringify(this.cartResponse));
+                                       
+      expect(called).toBeTruthy()
+    })
   })
   
   describe('.add()', function () {
@@ -150,6 +162,20 @@ describe("Bootic.Cart", function() {
       expect(called.vendor).toBe('Apple')
       
     })
+    
+    it('triggers handlers for "updated"', function () {
+      var called = null;
+      var handler = function (evt) { called = true }
+      Bootic.Cart.bind('updated', handler)
+      
+      Bootic.Cart.add(123)
+      
+      this.requests[0].respond(200, { "Content-Type": "application/json" },
+                                       JSON.stringify(this.cartResponse));
+      
+      expect(called).toBeTruthy()
+      
+    })
   })
   
   describe('.remove()', function () {
@@ -198,6 +224,20 @@ describe("Bootic.Cart", function() {
 
        expect(called.model).toBe('iPod')
        expect(called.vendor).toBe('Acme')
+    })
+    
+    it('triggers handlers for "updated"', function () {
+      var called = null;
+      var handler = function (evt) { called = true }
+      Bootic.Cart.bind('updated', handler)
+      
+      Bootic.Cart.remove(123)
+      
+      this.requests[0].respond(200, { "Content-Type": "application/json" },
+                                       JSON.stringify(this.cartResponse));
+      
+      expect(called).toBeTruthy()
+      
     })
   })
   
