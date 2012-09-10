@@ -76,15 +76,16 @@ Cart.prototype = {
   //
   // - `loading`: before server response
   // - `loaded`: after successfully loaded from server. Updated cart object passed as argument.
+  // - `error`: something went wrong with the Ajax request
   
   load: function (fn) {
     this.trigger('loading')
     fn = fn || $.noop
-    $.getJSON('/cart.json', $.proxy(function (cartData) {
+    this.request('/cart.json', {type: 'get'}, function (cartData) {
       this.update(cartData)
       fn(this)
       this.trigger('loaded', [this])
-    }, this))
+    })
     return this
   },
   
@@ -125,6 +126,7 @@ Cart.prototype = {
   //
   // - `adding`: before server response
   // - `added`: after successfully added to server. Added product passed as argument.
+  // - `error`: something went wrong with the Ajax request
    
   add: function (productId, fn, opts) {
     fn = fn || $.noop;
@@ -163,9 +165,9 @@ Cart.prototype = {
     this.forEach(function (item) {
       if(item.product_id == productId){
         match = item
-        if(fn) fn(item)
       }
     })
+    if(fn) fn(match)
     return match
   },
   
@@ -199,6 +201,7 @@ Cart.prototype = {
   //
   // - `removing`: before server response
   // - `removed`: after successfully removed
+  // - `error`: something went wrong with the Ajax request
   
   remove: function (productId, fn, opts) {
     fn = fn || $.noop
