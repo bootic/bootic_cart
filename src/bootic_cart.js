@@ -92,7 +92,6 @@ Cart.prototype = {
        data: data,
        success: $.proxy(function (cartData) {
          this.update(cartData)
-         console.log('cartData',cartData)
          var item = this.find(productId)
          fn(item)
          this.trigger('added', [item])
