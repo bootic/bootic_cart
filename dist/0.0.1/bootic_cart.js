@@ -23,7 +23,10 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------*/
+// Declare global namespace
 var Bootic = Bootic || {};
+
+// Wrap everything in a closure
 ;(function (window, $) {
 
 // Events module
@@ -133,7 +136,7 @@ Cart.prototype = {
       dataType: 'json'
     }, opts || {})
     
-    var data = {
+    opts.data = {
       cart_item: {
         product_id: productId,
         quantity: opts.qty
@@ -142,21 +145,13 @@ Cart.prototype = {
     
     this.trigger('adding');
     
-    $.ajax(opts.url, {
-       dataType: opts.dataType,
-       type: opts.type,
-       data: data,
-       success: $.proxy(function (cartData) {
-         this.update(cartData)
-         console.log('cartData',cartData)
-         var item = this.find(productId)
-         fn(item)
-         this.trigger('added', [item])
-       }, this),
-       error: $.proxy(function () {
-         this.trigger('error')
-       }, this)
+    this.request(opts.url, opts, function (cartData) {
+      this.update(cartData)
+       var item = this.find(productId)
+       fn(item)
+       this.trigger('added', [item])
     })
+
     return this
   },
   
@@ -217,14 +212,12 @@ Cart.prototype = {
         type: 'delete'
       }, opts);
       
-      $.ajax(opts.url, {
-        type: opts.type,
-        success: $.proxy(function (cartData) {
-          this.update(cartData)
-          fn(item)
-          this.trigger('removed', [item])
-        }, this)
+      this.request(opts.url, opts, function (cartData) {
+        this.update(cartData)
+        fn(item)
+        this.trigger('removed', [item])
       })
+      
     })
   },
   
@@ -251,11 +244,32 @@ Cart.prototype = {
     this._loaded = true
     $.extend(this, cartData)
     this.trigger('updated')
+  },
+  
+  // Issue an Ajax request
+  // -----------------------
+  //
+  // Takes: 
+  //
+  // - `url`
+  // - `opts`: Ajax options object as per jQuery.ajax
+  // - `fn`: success callback. Will be run in the context of this instance.
+  //
+  request: function (url, opts, fn) {
+    opts = $.extend({
+      success: $.proxy(fn, this),
+      error: $.proxy(function (e) {
+        this.trigger('error', [e])
+      }, this)
+    }, opts || {})
+    return $.ajax(url, opts)
   }
 }
 
+// Mix in bind and trigger of events
 $.extend(Cart.prototype, Events);
 
+// Assign new instance to global Bootic.Cart
 Bootic.Cart = new Cart();
 // HTML data API (jQuery plugin)
 // ==============================
