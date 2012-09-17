@@ -4,13 +4,15 @@
 $(function () {
   
   function get(productId) {
-    return $('form[data-bootic-productId="'+ productId +'"]')
+    return $('[data-bootic-productId="'+ productId +'"]')
   }
   
   Bootic.Cart
-  
     .bind('added', function (evt, item) {
       get(item.product_id).trigger('added.bootic', [item])
+    })
+    .bind('removing', function (evt, item) {
+      get(item.product_id).trigger('removing.bootic', [item])
     })
     .bind('removed', function (evt, item) {
       get(item.product_id).trigger('removed.bootic', [item])
