@@ -21,6 +21,9 @@ bundle 'bootic_cart.js' do
   file 'bootic_cart.js'
   file 'html_data_api.js'
   file 'foot.js'
+  # Templating engine
+  # https://github.com/premasagar/tim
+  file 'tim.js'
 end
 
 # Optional post-bundling filter, for example for string substitution

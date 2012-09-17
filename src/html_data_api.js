@@ -54,13 +54,19 @@ $(function () {
       return false
           
     })
-    
-  $.fn.booticTemplateRender = function (data) {
-    var $t = $(this);
-    for(var propName in data) {
-      $t.find('[data-bind="' + propName + '"]').text(data[propName])
-    }
-    return $t
+  
+  Bootic.templateEngine = tim.parser({start:"<%", end:"%>", type:"text/html"})
+  Bootic.templates = Bootic.templates || {}; // template cache object
+  
+  $("script[type='text/html'][data-template]").each(function(){
+    var $e = $(this)
+    Bootic.templates[$e.data('template')] = $e.html();
+  });
+  
+  $.fn.booticTemplateRender = function (templateName, data) {
+    var content = Bootic.templateEngine(Bootic.templates[templateName], data);
+    $(this).empty().append(content)
+    return $(this)
   }
   
 })
