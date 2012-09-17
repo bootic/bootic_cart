@@ -8,6 +8,9 @@ $(function () {
   }
   
   Bootic.Cart
+    .bind('adding', function (evt, item) {
+      get(item.product_id).trigger('adding.bootic', [item])
+    })
     .bind('added', function (evt, item) {
       get(item.product_id).trigger('added.bootic', [item])
     })
@@ -46,10 +49,7 @@ $(function () {
       if(variantInput.length > 0) options['variant_id'] = variantInput.val()
       if(qtyIput.length > 0) options['quantity'] = qtyIput.val()
       
-      $e.trigger('adding.bootic')
-      Bootic.Cart.add(productId, function (item) {
-        $e.trigger('added.bootic', [item])
-      }, options)
+      Bootic.Cart.add(productId, null, options)
       
       return false
           

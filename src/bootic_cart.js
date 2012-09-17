@@ -86,7 +86,7 @@ Cart.prototype = {
       }
     }
     
-    this.trigger('adding');
+    this.trigger('adding', [{product_id: productId}]);
     
     this.request(opts.url, opts, function (cartData) {
       this.update(cartData)
