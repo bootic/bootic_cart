@@ -283,37 +283,5 @@ var tim = (function createTim(initSettings) {
       }
     }
   });
-  /////
-  // Dom plugin: finds micro-templates in <script>'s in the DOM
-  // This block of code can be removed if unneeded - e.g. with server-side JS
-  // Default: <script type="text/tim" class="foo">{{TEMPLATE}}</script>
-  if (window && window.document) {
-    tim.dom = function (domSettings) {
-      domSettings = domSettings || {};
-      var type = domSettings.type || settings.type || "text/tim",
-        attr = domSettings.attr || settings.attr || "class",
-        document = window.document,
-        hasQuery = !! document.querySelectorAll,
-        elements = hasQuery ? document.querySelectorAll("script[type='" + type + "']") : document.getElementsByTagName("script"),
-        i = 0,
-        len = elements.length,
-        elem, key, templatesInDom = {};
-      for (; i < len; i++) {
-        console.log('found', i)
-        elem = elements[i];
-        // Cannot access "class" using el.getAttribute()
-        key = attr === "class" ? elem.className : elem.getAttribute(attr);
-        if (key && (hasQuery || elem.type === type)) {
-          templatesInDom[key] = elem.innerHTML;
-        }
-      }
-      templatesCache(templatesInDom);
-      return templatesInDom;
-    };
-    addFilter("init", function () {
-      console.log('INIT')
-      tim.dom();
-    });
-  }
   return tim;
 }()); /*jslint browser: true, onevar: true, undef: true, eqeqeq: true, bitwise: true, regexp: true, newcap: true, immed: true, strict: true */
