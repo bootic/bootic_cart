@@ -61,7 +61,7 @@ Cart.prototype = {
   //
   // - `url`: URL to load cart from (default: /cart/cart_items)
   // - `type`: request method (default: 'get')
-  // - `qty`: quantity to increment product units in the cart by (default: 1)
+  // - `units`: units of this product to add to cart
   //
   // Triggers:
   //
@@ -74,7 +74,7 @@ Cart.prototype = {
     
     var opts = $.extend({
       url: '/cart/cart_items',
-      qty: 1,
+      units: 1,
       type: 'post',
       dataType: 'json'
     }, opts || {})
@@ -82,7 +82,7 @@ Cart.prototype = {
     opts.data = {
       cart_item: {
         product_id: productId,
-        quantity: opts.qty
+        quantity: opts.units
       }
     }
     
