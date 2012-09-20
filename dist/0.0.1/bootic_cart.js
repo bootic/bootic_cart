@@ -120,7 +120,7 @@ Cart.prototype = {
   //
   // - `url`: URL to load cart from (default: /cart/cart_items)
   // - `type`: request method (default: 'get')
-  // - `units`: units of this product to add to cart
+  // - `quantity`: units of this product to add to cart
   //
   // Triggers:
   //
@@ -133,7 +133,7 @@ Cart.prototype = {
     
     var opts = $.extend({
       url: '/cart/cart_items',
-      units: 1,
+      quantity: 1,
       type: 'post',
       dataType: 'json'
     }, opts || {})
@@ -141,7 +141,7 @@ Cart.prototype = {
     opts.data = {
       cart_item: {
         product_id: productId,
-        quantity: opts.units
+        quantity: opts.quantity
       }
     }
     
@@ -319,13 +319,20 @@ $(function () {
       
       var options = {
         type: $e.attr('method'),
-        url: $e.attr('action')
+        url: $e.attr('action'),
+        quantity: 1
       }
       
       if(variantInput.length > 0) options['variant_id'] = variantInput.val()
-      if(qtyIput.length > 0) options['quantity'] = qtyIput.val()
       
-      Bootic.Cart.add(productId, null, options)
+      Bootic.Cart.find(productId, function (product) {
+        if(qtyIput.length > 0) { // user is providing quantity
+          options.quantity = qtyIput.val()
+        } else if(product) { // increment by 1
+          options.quantity = product.quantity + 1
+        }
+        Bootic.Cart.add(productId, null, options)
+      })
       
       return false
           
