@@ -43,13 +43,20 @@ $(function () {
       
       var options = {
         type: $e.attr('method'),
-        url: $e.attr('action')
+        url: $e.attr('action'),
+        quantity: 1
       }
       
       if(variantInput.length > 0) options['variant_id'] = variantInput.val()
-      if(qtyIput.length > 0) options['quantity'] = qtyIput.val()
       
-      Bootic.Cart.add(productId, null, options)
+      Bootic.Cart.find(productId, function (product) {
+        if(qtyIput.length > 0) { // user is providing quantity
+          options.quantity = qtyIput.val()
+        } else if(product) { // increment by 1
+          options.quantity = product.quantity + 1
+        }
+        Bootic.Cart.add(productId, null, options)
+      })
       
       return false
           
