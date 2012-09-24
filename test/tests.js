@@ -20,7 +20,8 @@ describe("Bootic.Cart", function() {
           formatted_price: '$100',
           model: 'iPod',
           product_id: 123,
-          id: 111,
+          id: 666,
+          variant_id: 111,
           image: '/images/foo.png'
         }
       ],
@@ -112,13 +113,14 @@ describe("Bootic.Cart", function() {
           
       var callback = sinon.spy();
       
-      Bootic.Cart.add(124, callback)
+      Bootic.Cart.add(333, callback)
       
       var newProduct = {
             vendor: 'Apple',
             formatted_price: '$100',
             model: 'iPhone',
             product_id: 124,
+            variant_id: 333
           },
           cartResponse = responseWithProduct.call(this, newProduct);
       
@@ -150,10 +152,11 @@ describe("Bootic.Cart", function() {
             formatted_price: '$100',
             model: 'iPhone',
             product_id: 124,
+            variant_id: 333
           },
           cartResponse = responseWithProduct.call(this, newProduct);
       
-      Bootic.Cart.add(124)
+      Bootic.Cart.add(333)
       
       this.requests[0].respond(200, { "Content-Type": "application/json" },
                                        JSON.stringify(cartResponse));
@@ -168,7 +171,7 @@ describe("Bootic.Cart", function() {
       var handler = function (evt) { called = true }
       Bootic.Cart.bind('updated', handler)
       
-      Bootic.Cart.add(123)
+      Bootic.Cart.add(111)
       
       this.requests[0].respond(200, { "Content-Type": "application/json" },
                                        JSON.stringify(this.cartResponse));
@@ -186,7 +189,7 @@ describe("Bootic.Cart", function() {
       
       expect(Bootic.Cart.products.length).toBe(1)
       
-      Bootic.Cart.remove(123, callback)
+      Bootic.Cart.remove(111, callback)
       
       var updatedResponse = $.extend({}, this.cartResponse, {net_total: 0})
       updatedResponse.products = []
@@ -207,7 +210,7 @@ describe("Bootic.Cart", function() {
        Bootic.Cart.update(this.cartResponse)
        
        Bootic.Cart.bind('removing', handler)
-       Bootic.Cart.remove(123)
+       Bootic.Cart.remove(111)
        
        expect(called.model).toBe('iPod')
     })
@@ -217,7 +220,7 @@ describe("Bootic.Cart", function() {
        var handler = function (evt, item) { called = item }
        Bootic.Cart.bind('removed', handler)
 
-       Bootic.Cart.remove(123)
+       Bootic.Cart.remove(111)
 
        this.requests[0].respond(200, { "Content-Type": "application/json" },
                                         JSON.stringify(this.cartResponse));
@@ -231,7 +234,7 @@ describe("Bootic.Cart", function() {
       var handler = function (evt) { called = true }
       Bootic.Cart.bind('updated', handler)
       
-      Bootic.Cart.remove(123)
+      Bootic.Cart.remove(111)
       
       this.requests[0].respond(200, { "Content-Type": "application/json" },
                                        JSON.stringify(this.cartResponse));
@@ -247,8 +250,8 @@ describe("Bootic.Cart", function() {
     })
     
     describe('sync', function () {
-      it('finds items by product id', function () {
-        var item = Bootic.Cart.find(123)
+      it('finds items by variant id', function () {
+        var item = Bootic.Cart.find(111)
         expect(item.model).toBe('iPod')
       })
     
@@ -259,9 +262,9 @@ describe("Bootic.Cart", function() {
     })
     
     describe('async', function () {
-      it('finds items by product id', function () {
+      it('finds items by variant id', function () {
         var found;
-        var item = Bootic.Cart.find(123, function (item) {
+        var item = Bootic.Cart.find(111, function (item) {
           found = item
         })
         expect(found.model).toBe('iPod')

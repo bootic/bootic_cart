@@ -53,7 +53,7 @@ Cart.prototype = {
   //
   // Takes:
   //
-  // - `productId`: product ID to ad to cart
+  // - `variantId`: variant ID to add to cart
   // - `fn`: (optional) a callback to be run with the loaded cart as an argument.
   // - `opts`: (optional) options object with default overrides.
   //
@@ -69,7 +69,7 @@ Cart.prototype = {
   // - `added`: after successfully added to server. Added product passed as argument.
   // - `error`: something went wrong with the Ajax request
    
-  add: function (productId, fn, opts) {
+  add: function (variantId, fn, opts) {
     fn = fn || $.noop;
     
     var opts = $.extend({
@@ -79,18 +79,20 @@ Cart.prototype = {
       dataType: 'json'
     }, opts || {})
     
-    opts.data = {
+    var data = {
       cart_item: {
-        product_id: productId,
+        variant_id: variantId,
         quantity: opts.quantity
       }
     }
     
-    this.trigger('adding', [{product_id: productId}]);
+    opts.data = data;
+    
+    this.trigger('adding', [{variant_id: variantId}]);
     
     this.request(opts.url, opts, function (cartData) {
       this.update(cartData)
-       var item = this.find(productId)
+       var item = this.find(variantId)
        fn(item)
        this.trigger('added', [item])
     })
@@ -98,10 +100,23 @@ Cart.prototype = {
     return this
   },
   
-  // Find a product by product ID
+  // Find a product by variant ID
   // ------------------------------
   
-  find: function (productId, fn) {
+  find: function (variantId, fn) {
+    var match = null;
+    this.forEach(function (item) {
+      if(item.variant_id == variantId){
+        match = item
+      }
+    })
+    if(fn) fn(match)
+    return match
+  },
+  
+  // Find a product by product ID
+  // ------------------------------------------
+  findByProductId: function (productId, fn) {
     var match = null;
     this.forEach(function (item) {
       if(item.product_id == productId){
@@ -129,7 +144,7 @@ Cart.prototype = {
   //
   // Takes:
   //
-  // - `productId`: product ID to remove from cart
+  // - `variantId`: cart item variant ID to remove
   // - `fn`: (optional) callback to be run after successful removal. Removed product passed as argument.
   // - `opts`: (optional) options object
   //
@@ -144,12 +159,12 @@ Cart.prototype = {
   // - `removed`: after successfully removed
   // - `error`: something went wrong with the Ajax request
   
-  remove: function (productId, fn, opts) {
+  remove: function (variantId, fn, opts) {
     fn = fn || $.noop
     
     return this.loadAndThen(function () {
-      var item = this.find(productId)
-      if(!item){this.trigger('error', ["No cart item with product ID " + productId]); return this}
+      var item = this.find(variantId)
+      if(!item){this.trigger('error', ["No cart item with variant ID " + variantId]); return this}
       this.trigger('removing', [item])
       var opts = $.extend({
         url: ('/cart/cart_items/' + item.id),

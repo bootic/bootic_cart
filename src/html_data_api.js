@@ -3,6 +3,8 @@
 
 $(function () {
   
+  var formSelector = 'form[data-bootic-cart-add]';
+  
   function get(productId) {
     return $('[data-bootic-productId="'+ productId +'"]')
   }
@@ -27,19 +29,33 @@ $(function () {
     })
   
   
-  $('form[data-bootic-cart-add]')
+  // Lets remove quantity field from form. Simpler to click many times or use Ajax cart
+  $('input[name="cart_item[quantity]"]').remove()
+  
+  // If $e is a set of radio buttons get checked one
+  function getUniqueValue ($e) {
+    if($e.is(':radio')) 
+      return $e.filter(':checked').val()
+    else
+      return $e.val()
+  }
+  
+  $(formSelector)
     .on('added.bootic', function (evt, item) {
       $(this).addClass('bootic_cart_added')
     })
     .on('removed.bootic', function (evt, item) {
       $(this).removeClass('bootic_cart_added')
     })
-    .on('submit', function () {
-    
+    .on('submit', function (evt) {
       var $e = $(this),
-          productId = $e.find('input[name="cart_item[product_id]"]').val(),
-          variantInput = $e.find('input[name="cart_item[variant_id]"]'),
+          variantId = getUniqueValue($e.find('input[name="cart_item[variant_id]"]')),
           qtyIput = $e.find('input[name="cart_item[quantity]"]');
+      
+      if(variantId == undefined) {
+        evt.preventDefault()
+        throw "Your form must have an input of name cart_item[variant_id]"
+      }
       
       var options = {
         type: $e.attr('method'),
@@ -47,15 +63,13 @@ $(function () {
         quantity: 1
       }
       
-      if(variantInput.length > 0) options['variant_id'] = variantInput.val()
-      
-      Bootic.Cart.find(productId, function (product) {
+      Bootic.Cart.find(variantId, function (item) {
         if(qtyIput.length > 0) { // user is providing quantity
           options.quantity = qtyIput.val()
-        } else if(product) { // increment by 1
-          options.quantity = product.quantity + 1
+        } else if(item) { // increment by 1
+          options.quantity = item.quantity + 1
         }
-        Bootic.Cart.add(productId, null, options)
+        Bootic.Cart.add(variantId, null, options)
       })
       
       return false
