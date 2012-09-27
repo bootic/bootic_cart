@@ -110,8 +110,11 @@ describe("Bootic.Cart", function() {
     
     it('updates cart and adds product', function () {
       expect(Bootic.Cart.isEmpty()).toBeTruthy()
-          
-      var callback = sinon.spy();
+      
+      var received = null
+      var callback = function (item){
+        received = item
+      }
       
       Bootic.Cart.add(333, callback)
       
@@ -126,8 +129,10 @@ describe("Bootic.Cart", function() {
       
       this.requests[0].respond(200, { "Content-Type": "application/json" },
                                        JSON.stringify(cartResponse));
-                                       
-      expect(callback).toHaveBeenCalledWith(newProduct)
+      
+      expect(received.vendor).toEqual(newProduct.vendor)
+      expect(received.formatted_price).toEqual(newProduct.formatted_price)
+      expect(received.variant_id).toEqual(newProduct.variant_id)
       expect(Bootic.Cart.isEmpty()).toBeFalsy()
       expect(Bootic.Cart.products.length).toBe(2)
     })

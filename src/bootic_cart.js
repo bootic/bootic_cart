@@ -41,6 +41,7 @@ Cart.prototype = {
     this.formatted_total = '0'
     this.currency = null
     this.total = 0
+    this._productCounts = {};
     this._loaded = false
     if(silent) this.trigger('reset')
     return this
@@ -173,8 +174,14 @@ Cart.prototype = {
       
       this.request(opts.url, opts, function (cartData) {
         this.update(cartData)
-        fn(item)
-        this.trigger('removed', [item])
+        if(this._productCounts[item.product_id]) {// not all variants deleted
+          item = this.findByProductId(item.product_id) // need to find again for calculated values. Better way?
+          this.trigger('added', [item])
+        } else { // all variants deleted
+          fn(item)
+          this.trigger('removed', [item])
+        }
+        
       })
       
     })
@@ -198,10 +205,15 @@ Cart.prototype = {
   },
   
   // Update cart with server response
+  // Update unique product counts
   
   update: function (cartData) {
     this._loaded = true
+    this._productCounts = {}
     $.extend(this, cartData)
+    this._calculateCounts()
+    this._decorateProducts()
+    
     this.trigger('updated')
   },
   
@@ -222,6 +234,19 @@ Cart.prototype = {
       }, this)
     }, opts || {})
     return $.ajax(url, opts)
+  },
+  
+  _decorateProducts: function () {
+    this.forEach(function (item) {
+      item.total_units = this._productCounts[item.product_id]
+    })
+  },
+  
+  _calculateCounts: function () {
+    $.each(this.products, $.proxy(function (i, item) {
+      this._productCounts[item.product_id] = this._productCounts[item.product_id] || 0
+      this._productCounts[item.product_id] += item.quantity
+    }, this))
   }
 }
 
