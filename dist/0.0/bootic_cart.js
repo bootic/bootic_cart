@@ -100,6 +100,7 @@ Cart.prototype = {
     this.formatted_total = '0'
     this.currency = null
     this.total = 0
+    this._productCounts = {};
     this._loaded = false
     if(silent) this.trigger('reset')
     return this
@@ -112,7 +113,7 @@ Cart.prototype = {
   //
   // Takes:
   //
-  // - `productId`: product ID to ad to cart
+  // - `variantId`: variant ID to add to cart
   // - `fn`: (optional) a callback to be run with the loaded cart as an argument.
   // - `opts`: (optional) options object with default overrides.
   //
@@ -128,7 +129,7 @@ Cart.prototype = {
   // - `added`: after successfully added to server. Added product passed as argument.
   // - `error`: something went wrong with the Ajax request
    
-  add: function (productId, fn, opts) {
+  add: function (variantId, fn, opts) {
     fn = fn || $.noop;
     
     var opts = $.extend({
@@ -138,18 +139,20 @@ Cart.prototype = {
       dataType: 'json'
     }, opts || {})
     
-    opts.data = {
+    var data = {
       cart_item: {
-        product_id: productId,
+        variant_id: variantId,
         quantity: opts.quantity
       }
     }
     
-    this.trigger('adding', [{product_id: productId}]);
+    opts.data = data;
+    
+    this.trigger('adding', [{variant_id: variantId}]);
     
     this.request(opts.url, opts, function (cartData) {
       this.update(cartData)
-       var item = this.find(productId)
+       var item = this.find(variantId)
        fn(item)
        this.trigger('added', [item])
     })
@@ -157,10 +160,23 @@ Cart.prototype = {
     return this
   },
   
-  // Find a product by product ID
+  // Find a product by variant ID
   // ------------------------------
   
-  find: function (productId, fn) {
+  find: function (variantId, fn) {
+    var match = null;
+    this.forEach(function (item) {
+      if(item.variant_id == variantId){
+        match = item
+      }
+    })
+    if(fn) fn(match)
+    return match
+  },
+  
+  // Find a product by product ID
+  // ------------------------------------------
+  findByProductId: function (productId, fn) {
     var match = null;
     this.forEach(function (item) {
       if(item.product_id == productId){
@@ -188,7 +204,7 @@ Cart.prototype = {
   //
   // Takes:
   //
-  // - `productId`: product ID to remove from cart
+  // - `variantId`: cart item variant ID to remove
   // - `fn`: (optional) callback to be run after successful removal. Removed product passed as argument.
   // - `opts`: (optional) options object
   //
@@ -203,12 +219,12 @@ Cart.prototype = {
   // - `removed`: after successfully removed
   // - `error`: something went wrong with the Ajax request
   
-  remove: function (productId, fn, opts) {
+  remove: function (variantId, fn, opts) {
     fn = fn || $.noop
     
     return this.loadAndThen(function () {
-      var item = this.find(productId)
-      if(!item){this.trigger('error', ["No cart item with product ID " + productId]); return this}
+      var item = this.find(variantId)
+      if(!item){this.trigger('error', ["No cart item with variant ID " + variantId]); return this}
       this.trigger('removing', [item])
       var opts = $.extend({
         url: ('/cart/cart_items/' + item.id),
@@ -217,8 +233,14 @@ Cart.prototype = {
       
       this.request(opts.url, opts, function (cartData) {
         this.update(cartData)
-        fn(item)
-        this.trigger('removed', [item])
+        if(this._productCounts[item.product_id]) {// not all variants deleted
+          item = this.findByProductId(item.product_id) // need to find again for calculated values. Better way?
+          this.trigger('added', [item])
+        } else { // all variants deleted
+          fn(item)
+          this.trigger('removed', [item])
+        }
+        
       })
       
     })
@@ -242,10 +264,15 @@ Cart.prototype = {
   },
   
   // Update cart with server response
+  // Update unique product counts
   
   update: function (cartData) {
     this._loaded = true
+    this._productCounts = {}
     $.extend(this, cartData)
+    this._calculateCounts()
+    this._decorateProducts()
+    
     this.trigger('updated')
   },
   
@@ -266,6 +293,19 @@ Cart.prototype = {
       }, this)
     }, opts || {})
     return $.ajax(url, opts)
+  },
+  
+  _decorateProducts: function () {
+    this.forEach(function (item) {
+      item.total_units = this._productCounts[item.product_id]
+    })
+  },
+  
+  _calculateCounts: function () {
+    $.each(this.products, $.proxy(function (i, item) {
+      this._productCounts[item.product_id] = this._productCounts[item.product_id] || 0
+      this._productCounts[item.product_id] += item.quantity
+    }, this))
   }
 }
 
@@ -278,6 +318,8 @@ Bootic.Cart = new Cart();
 // ==============================
 
 $(function () {
+  
+  var formSelector = 'form[data-bootic-cart-add]';
   
   function get(productId) {
     return $('[data-bootic-productId="'+ productId +'"]')
@@ -303,19 +345,33 @@ $(function () {
     })
   
   
-  $('form[data-bootic-cart-add]')
+  // Lets remove quantity field from form. Simpler to click many times or use Ajax cart
+  $('input[name="cart_item[quantity]"]').remove()
+  
+  // If $e is a set of radio buttons get checked one
+  function getUniqueValue ($e) {
+    if($e.is(':radio')) 
+      return $e.filter(':checked').val()
+    else
+      return $e.val()
+  }
+  
+  $(formSelector)
     .on('added.bootic', function (evt, item) {
       $(this).addClass('bootic_cart_added')
     })
     .on('removed.bootic', function (evt, item) {
       $(this).removeClass('bootic_cart_added')
     })
-    .on('submit', function () {
-    
+    .on('submit', function (evt) {
       var $e = $(this),
-          productId = $e.find('input[name="cart_item[product_id]"]').val(),
-          variantInput = $e.find('input[name="cart_item[variant_id]"]'),
+          variantId = getUniqueValue($e.find('input[name="cart_item[variant_id]"]')),
           qtyIput = $e.find('input[name="cart_item[quantity]"]');
+      
+      if(variantId == undefined) {
+        evt.preventDefault()
+        throw "Your form must have an input of name cart_item[variant_id]"
+      }
       
       var options = {
         type: $e.attr('method'),
@@ -323,15 +379,13 @@ $(function () {
         quantity: 1
       }
       
-      if(variantInput.length > 0) options['variant_id'] = variantInput.val()
-      
-      Bootic.Cart.find(productId, function (product) {
+      Bootic.Cart.find(variantId, function (item) {
         if(qtyIput.length > 0) { // user is providing quantity
           options.quantity = qtyIput.val()
-        } else if(product) { // increment by 1
-          options.quantity = product.quantity + 1
+        } else if(item) { // increment by 1
+          options.quantity = item.quantity + 1
         }
-        Bootic.Cart.add(productId, null, options)
+        Bootic.Cart.add(variantId, null, options)
       })
       
       return false
