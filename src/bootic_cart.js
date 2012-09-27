@@ -43,6 +43,7 @@ Cart.prototype = {
     this.total = 0
     this._productCounts = {};
     this._loaded = false
+    this.has_promotion = false
     if(silent) this.trigger('reset')
     return this
   },
@@ -213,7 +214,7 @@ Cart.prototype = {
     $.extend(this, cartData)
     this._calculateCounts()
     this._decorateProducts()
-    
+    this.has_promotion = !!this.promotion
     this.trigger('updated')
   },
   
