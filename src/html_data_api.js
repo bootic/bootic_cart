@@ -63,6 +63,9 @@ $(function () {
         quantity: 1
       }
       
+      // We need to trigger the product ID here, because we don't get it from the API until added.
+      $e.trigger('adding.bootic', {product_id: $e.data('bootic-cart-add')})
+      
       Bootic.Cart.find(variantId, function (item) {
         if(qtyIput.length > 0) { // user is providing quantity
           options.quantity = qtyIput.val()

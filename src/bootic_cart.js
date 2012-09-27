@@ -89,7 +89,7 @@ Cart.prototype = {
     
     opts.data = data;
     
-    this.trigger('adding', [{variant_id: variantId}]);
+    //this.trigger('adding', [{variant_id: variantId}]);
     
     this.request(opts.url, opts, function (cartData) {
       this.update(cartData)
