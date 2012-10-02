@@ -27,6 +27,18 @@ $(function () {
         get(item.product_id).trigger('added.bootic', [item])
       })
     })
+    .bind('updated', function () { // Site wide Bootic promotion notice
+      var top = $('#bootic_top_notice')
+      if(top.length == 0) {
+        $('body').prepend('<div id="bootic_top_notice"></div>')
+      }
+      if(Bootic.Cart.hasPromotion) {
+        var h = $('#bootic_top_notice').booticTemplateRender('bootic_top_promo', Bootic.Cart).height()
+        $('body').css('paddingTop', (parseInt(h) + 5) + 'px')
+        if(Bootic.Cart.invalidPromotion) $('#bootic_top_notice #bootic_top_promo').addClass('bootic_warning')
+        else $('#bootic_top_notice #bootic_top_promo').removeClass('bootic_warning')
+      }
+    })
   
   
   // Lets remove quantity field from form. Simpler to click many times or use Ajax cart
@@ -79,7 +91,7 @@ $(function () {
           
     })
   
-  Bootic.templateEngine = tim.parser({start:"<%", end:"%>", type:"text/html"})
+  Bootic.templateEngine = tim.parser({start:"@{", end:'}', type:"text/html"})
   Bootic.templates = Bootic.templates || {}; // template cache object
   
   $("script[type='text/html'][data-template]").each(function(){

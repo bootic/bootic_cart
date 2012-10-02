@@ -137,16 +137,6 @@ describe("Bootic.Cart", function() {
       expect(Bootic.Cart.products.length).toBe(2)
     })
     
-    it('triggers handlers for "adding"', function () {
-      var called = 0;
-      var handler = function () { called = 1 }
-      
-      Bootic.Cart.bind('adding', handler)
-      Bootic.Cart.add(124)
-      
-      expect(called).toBe(1)
-    })
-    
     it('triggers handlers for "added"', function () {
       var called = null;
       var handler = function (evt, item) { called = item }

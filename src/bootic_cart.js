@@ -43,7 +43,8 @@ Cart.prototype = {
     this.total = 0
     this._productCounts = {};
     this._loaded = false
-    this.has_promotion = false
+    this.hasPromotion = false
+    this.invalidPromotion = false
     if(silent) this.trigger('reset')
     return this
   },
@@ -214,7 +215,9 @@ Cart.prototype = {
     $.extend(this, cartData)
     this._calculateCounts()
     this._decorateProducts()
-    this.has_promotion = !!this.promotion
+    this.hasPromotion = this.promotion != undefined
+    this.validPromotion = !!(this.promotion && !this.promotion.errors)
+    this.invalidPromotion = !!(this.promotion && !this.isEmpty() && this.promotion.errors && this.promotion.errors.length > 0)
     this.trigger('updated')
   },
   

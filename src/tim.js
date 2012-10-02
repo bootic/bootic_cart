@@ -241,7 +241,7 @@ var tim = (function createTim(initSettings) {
     }
     template = applyFilter("templateBefore", template);
     // No template tags found in template
-    if (template.indexOf(settings.start) < 0) {
+    if (template && template.indexOf(settings.start) < 0) {
       // Is this a key for a cached template?
       templateLookup = templatesCache(template);
       if (templateLookup) {
