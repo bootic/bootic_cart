@@ -102,7 +102,8 @@ Cart.prototype = {
     this.total = 0
     this._productCounts = {};
     this._loaded = false
-    this.has_promotion = false
+    this.hasPromotion = false
+    this.invalidPromotion = false
     if(silent) this.trigger('reset')
     return this
   },
@@ -273,7 +274,9 @@ Cart.prototype = {
     $.extend(this, cartData)
     this._calculateCounts()
     this._decorateProducts()
-    this.has_promotion = !!this.promotion
+    this.hasPromotion = this.promotion != undefined
+    this.validPromotion = !!(this.promotion && !this.promotion.errors)
+    this.invalidPromotion = !!(this.promotion && !this.isEmpty() && this.promotion.errors && this.promotion.errors.length > 0)
     this.trigger('updated')
   },
   
@@ -344,6 +347,18 @@ $(function () {
         get(item.product_id).trigger('added.bootic', [item])
       })
     })
+    .bind('updated', function () { // Site wide Bootic promotion notice
+      var top = $('#bootic_top_notice')
+      if(top.length == 0) {
+        $('body').prepend('<div id="bootic_top_notice"></div>')
+      }
+      if(Bootic.Cart.hasPromotion) {
+        var h = $('#bootic_top_notice').booticTemplateRender('bootic_top_promo', Bootic.Cart).height()
+        $('body').css('paddingTop', (parseInt(h) + 5) + 'px')
+        if(Bootic.Cart.invalidPromotion) $('#bootic_top_notice #bootic_top_promo').addClass('bootic_warning')
+        else $('#bootic_top_notice #bootic_top_promo').removeClass('bootic_warning')
+      }
+    })
   
   
   // Lets remove quantity field from form. Simpler to click many times or use Ajax cart
@@ -396,7 +411,7 @@ $(function () {
           
     })
   
-  Bootic.templateEngine = tim.parser({start:"<%", end:"%>", type:"text/html"})
+  Bootic.templateEngine = tim.parser({start:"@{", end:'}', type:"text/html"})
   Bootic.templates = Bootic.templates || {}; // template cache object
   
   $("script[type='text/html'][data-template]").each(function(){
@@ -655,7 +670,7 @@ var tim = (function createTim(initSettings) {
     }
     template = applyFilter("templateBefore", template);
     // No template tags found in template
-    if (template.indexOf(settings.start) < 0) {
+    if (template && template.indexOf(settings.start) < 0) {
       // Is this a key for a cached template?
       templateLookup = templatesCache(template);
       if (templateLookup) {
