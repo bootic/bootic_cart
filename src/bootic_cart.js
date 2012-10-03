@@ -142,7 +142,7 @@ Cart.prototype = {
     })
   },
   
-  // Remove a product by product id
+  // Remove a product by variant id
   // ------------------------------
   //
   // Takes:
