@@ -274,6 +274,7 @@ Cart.prototype = {
     $.extend(this, cartData)
     this._calculateCounts()
     this._decorateProducts()
+    this.hasProducts = !this.isEmpty()
     this.hasPromotion = this.promotion != undefined
     this.validPromotion = !!(this.promotion && !this.promotion.errors)
     this.invalidPromotion = !!(this.promotion && !this.isEmpty() && this.promotion.errors && this.promotion.errors.length > 0)
@@ -302,6 +303,7 @@ Cart.prototype = {
   _decorateProducts: function () {
     this.forEach(function (item) {
       item.total_units = this._productCounts[item.product_id]
+      item.unavailable = !item.more_available
     })
   },
   
@@ -411,7 +413,7 @@ $(function () {
           
     })
   
-  Bootic.templateEngine = tim.parser({start:"@{", end:'}', type:"text/html"})
+  Bootic.templateEngine = tim.parser({start:"%{", end:'}', type:"text/html"})
   Bootic.templates = Bootic.templates || {}; // template cache object
   
   $("script[type='text/html'][data-template]").each(function(){
