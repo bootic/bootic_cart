@@ -91,7 +91,7 @@ $(function () {
           
     })
   
-  Bootic.templateEngine = tim.parser({start:"@{", end:'}', type:"text/html"})
+  Bootic.templateEngine = tim.parser({start:"%{", end:'}', type:"text/html"})
   Bootic.templates = Bootic.templates || {}; // template cache object
   
   $("script[type='text/html'][data-template]").each(function(){
