@@ -201,7 +201,7 @@ Cart.prototype = {
     })
   },
   
-  // Remove a product by product id
+  // Remove a product by variant id
   // ------------------------------
   //
   // Takes:
@@ -374,12 +374,30 @@ $(function () {
       return $e.val()
   }
   
+  // store original value of add-to-cart buttons in a data attribute
+  ;(function (e) {
+    $(e).data('org-copy', $(e).find('.submit').val())    
+  })($(formSelector))
+  
+  // Add to cart buttons (on product lists and detail)
+  // These events are triggered by Bootic.Cart HTML5 API
   $(formSelector)
+    .on('adding.bootic', function () {
+      $(this).addClass('bootic_cart_adding')
+    })
     .on('added.bootic', function (evt, item) {
+      $(this).removeClass('bootic_cart_adding')
       $(this).addClass('bootic_cart_added')
+      var $button = $(this).find('.submit');
+      if(item.more_available)
+        $button.val(item.total_units+' '+$button.data('in-cart'))
+      else
+        $button.val(item.total_units + '. ' + $button.data('out-of-stock'))
     })
     .on('removed.bootic', function (evt, item) {
       $(this).removeClass('bootic_cart_added')
+      // Reinstate original button value
+      $(this).find('.submit').val($(this).data('org-copy'))
     })
     .on('submit', function (evt) {
       var $e = $(this),
