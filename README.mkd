@@ -81,6 +81,16 @@ Jasmine tests in [/bootic/bootic_cart/blob/master/test/tests.js](/bootic/bootic_
     $ jbundle s
     $ open test/index.html
 
+## Build and minify
+
+    $ rake build
+    
+## Upload to S3
+
+You'll need the BOOTIC_S3_KEY and BOOTIC_S3_SECRET variables in your environment, then:
+
+    $ rake release
+    
 ## License
 
 bootic_cart.js
