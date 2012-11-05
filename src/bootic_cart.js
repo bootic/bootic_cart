@@ -220,7 +220,23 @@ Cart.prototype = {
     this.validPromotion = !!(this.promotion && !this.promotion.errors)
     this.invalidPromotion = !!(this.promotion && !this.isEmpty() && this.promotion.errors && this.promotion.errors.length > 0)
     this.trigger('updated')
+    // Trigger conditional events. Event names cannot match property names
+    if(this.hasPromotion){
+      // Trigger 'has_promotion' whenever a promotion is found
+      this.trigger('has_promotion', [this])
+      // Trigger 'new_promotion' only when promotion changes
+      var promo_cookie_name = 'bootic_cart_current_promo_name',
+          pname = getCookie(promo_cookie_name);
+      
+      if(this.promotion.name != pname) {
+       this._current_promo_name = this.promotion.name
+       setCookie(promo_cookie_name, this.promotion.name)
+       this.trigger('new_promotion', [this])  
+      }
+    }
   },
+  
+  toString: function (){return 'Bootic.Cart ('+this.products.length+' products)'},
   
   // Issue an Ajax request
   // -----------------------

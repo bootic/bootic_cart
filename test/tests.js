@@ -47,7 +47,7 @@ describe("Bootic.Cart", function() {
   
   describe('.load()', function () {
   
-    it("makes Ajax request, load cart and call callback", function() {
+    it("makes Ajax request, loads cart and run callback", function() {
       var callback = sinon.spy();
       Bootic.Cart.load(callback)
       expect(this.requests.length).toBe(1)
@@ -95,6 +95,61 @@ describe("Bootic.Cart", function() {
                                        
       expect(called).toBeTruthy()
     })
+    
+    describe('no promotion', function () {
+      it('does not trigger "has_promotion"', function () {
+        var callback = sinon.spy();
+        Bootic.Cart.bind('has_promotion', callback)
+        Bootic.Cart.load()
+
+        this.requests[0].respond(200, { "Content-Type": "application/json" },
+                                         JSON.stringify(this.cartResponse));
+                                         
+        expect(callback).not.toHaveBeenCalled()
+      })
+    })
+    
+    describe('with promotion', function () {
+      it('triggers "has_promotion" event', function () {
+        var received = null
+        function callback (evt, cart) {
+          received = cart
+        }
+        Bootic.Cart.bind('has_promotion', callback)
+        
+        var payload = this.cartResponse
+        payload['promotion'] = {
+          discount: 20,
+          discount_type: '%'
+        }
+
+        Bootic.Cart.update(payload)
+        expect(received).toBe(Bootic.Cart)
+      })
+      
+      it('triggers "new_promotion" event once per promotion', function () {
+        
+        var received = null
+        function callback (evt, cart) {
+          received = cart
+        }
+        
+        Bootic.Cart.bind('new_promotion', callback)
+        
+        var payload = this.cartResponse
+        payload['promotion'] = {
+          name: 'foo',
+          discount: 20,
+          discount_type: '%'
+        }
+        
+        Bootic.Cart.update(payload)
+        Bootic.Cart.update(payload)
+        expect(received).toBe(Bootic.Cart)
+      })
+      
+      
+    })
   })
   
   describe('.add()', function () {
@@ -113,6 +168,7 @@ describe("Bootic.Cart", function() {
       
       var received = null
       var callback = function (item){
+        console.log('received', arguments)
         received = item
       }
       
