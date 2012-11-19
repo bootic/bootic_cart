@@ -1,45 +1,16 @@
 // HTML data API (jQuery plugin)
 // ==============================
+// Put all non-instance DOM related behaviours in this namespace
+$.Bootic = $.Bootic || {}
 
-$(function () {
+// Enable Ajax Buttons. 
+// Clicking on product "add to cart" buttons will add selected product to Ajax cart. No redirect to /cart
+// Usage:
+//     $(function () { $.Bootic.ajaxButtons() })
+//
+$.Bootic.ajaxButtons = function () {
   
   var formSelector = 'form[data-bootic-cart-add]';
-  
-  function get(productId) {
-    return $('[data-bootic-productId="'+ productId +'"]')
-  }
-  
-  Bootic.Cart
-    .bind('adding', function (evt, item) {
-      get(item.product_id).trigger('adding.bootic', [item])
-    })
-    .bind('added', function (evt, item) {
-      get(item.product_id).trigger('added.bootic', [item])
-    })
-    .bind('removing', function (evt, item) {
-      get(item.product_id).trigger('removing.bootic', [item])
-    })
-    .bind('removed', function (evt, item) {
-      get(item.product_id).trigger('removed.bootic', [item])
-    })
-    .bind('loaded', function (evt, cart) {
-      cart.forEach(function (item) {
-        get(item.product_id).trigger('added.bootic', [item])
-      })
-    })
-    .bind('updated', function () { // Site wide Bootic promotion notice
-      var top = $('#bootic_top_notice')
-      if(top.length == 0) {
-        $('body').prepend('<div id="bootic_top_notice"></div>')
-      }
-      if(Bootic.Cart.hasPromotion) {
-        var h = $('#bootic_top_notice').booticTemplateRender('bootic_top_promo', Bootic.Cart).height()
-        $('body').css('paddingTop', (parseInt(h) + 5) + 'px')
-        if(Bootic.Cart.invalidPromotion) $('#bootic_top_notice #bootic_top_promo').addClass('bootic_warning')
-        else $('#bootic_top_notice #bootic_top_promo').removeClass('bootic_warning')
-      }
-    })
-  
   
   // Lets remove quantity field from form. Simpler to click many times or use Ajax cart
   $('input[name="cart_item[quantity]"]').remove()
@@ -108,7 +79,16 @@ $(function () {
       return false
           
     })
+}
+
+// On page load.
+$(function () {
   
+  // Built-in templating
+  // Will detect any template in <script data-template type="text/html"></script> tags
+  // Usage:
+  //     $.booticTemplateRender('foo_template', data)
+  //
   Bootic.templateEngine = tim.parser({start:"%{", end:'}', type:"text/html"})
   Bootic.templates = Bootic.templates || {}; // template cache object
   
@@ -122,5 +102,43 @@ $(function () {
     $(this).empty().append(content)
     return $(this)
   }
+  
+  // Listen to cart changes and upate buttons
+  function get(productId) {
+    return $('[data-bootic-productId="'+ productId +'"]')
+  }
+  
+  Bootic.Cart
+    .bind('adding', function (evt, item) {
+      get(item.product_id).trigger('adding.bootic', [item])
+    })
+    .bind('added', function (evt, item) {
+      get(item.product_id).trigger('added.bootic', [item])
+    })
+    .bind('removing', function (evt, item) {
+      get(item.product_id).trigger('removing.bootic', [item])
+    })
+    .bind('removed', function (evt, item) {
+      get(item.product_id).trigger('removed.bootic', [item])
+    })
+    .bind('loaded', function (evt, cart) {
+      cart.forEach(function (item) {
+        get(item.product_id).trigger('added.bootic', [item])
+      })
+    })
+    
+    // Update top promo notice
+    Bootic.Cart.bind('updated', function () { // Site wide Bootic promotion notice
+      var top = $('#bootic_top_notice')
+      if(top.length == 0) {
+        $('body').prepend('<div id="bootic_top_notice"></div>')
+      }
+      if(Bootic.Cart.hasPromotion) {
+        var h = $('#bootic_top_notice').booticTemplateRender('bootic_top_promo', Bootic.Cart).height()
+        $('body').css('paddingTop', (parseInt(h) + 5) + 'px')
+        if(Bootic.Cart.invalidPromotion) $('#bootic_top_notice #bootic_top_promo').addClass('bootic_warning')
+        else $('#bootic_top_notice #bootic_top_promo').removeClass('bootic_warning')
+      }
+    })
   
 })
