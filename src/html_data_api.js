@@ -107,6 +107,7 @@ $(function () {
     var $e = $(this)
     Bootic.templates[$e.data('template')] = $e.html();
   });
+  Bootic.trigger('templatesLoaded');
   
   // Listen to cart changes and upate buttons
   function get(productId) {

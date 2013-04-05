@@ -72,6 +72,10 @@ bootic_cart.js will automatically hook itself up to forms with the following att
 </form><!--/form-->
 ```
 
+The following events are triggered on the global `Bootic` namespace.
+
+`templatesLoaded`: all templates have been cached from `data-template` script elements.
+
 ## Contributing
 
 Use jBundle on dev mode. [Learn more](https://github.com/ismasan/jbundle).

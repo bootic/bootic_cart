@@ -273,7 +273,10 @@ Cart.prototype = {
 }
 
 // Mix in bind and trigger of events
-$.extend(Cart.prototype, Events);
-
+// Global events
+// $.extend(Bootic, Events);
+// Cart events
+$.extend(Cart.prototype, Bootic.Events);
+$.extend(Bootic, Bootic.Events)
 // Assign new instance to global Bootic.Cart
 Bootic.Cart = new Cart();

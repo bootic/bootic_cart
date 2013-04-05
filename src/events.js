@@ -8,8 +8,8 @@
 //     $.extend(MyObject, Events)
 //     MyObject.bind('foo', function (evt, i) { alert(i)})
 //     MyObject.trigger('foo', [1])
-var Events = {
-  track: function (eventName) {
+Bootic.Events = {
+  __track: function (eventName) {
     if('Bootic' in window && 'track' in window.Bootic) {
       Bootic.track('Bootic.Cart:' + eventName)
     }
@@ -21,7 +21,7 @@ var Events = {
   },
   
   trigger: function (eventName, data) {
-    this.track(eventName)
+    this.__track(eventName)
     $(this).trigger(eventName, data)
     return this
   }
