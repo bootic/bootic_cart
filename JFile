@@ -16,10 +16,10 @@ src_dir './src'
 #
 bundle 'bootic_cart.js' do
   license 'license.txt'
-  file 'head.js'
   # Templating engine
   # https://github.com/premasagar/tim
   file 'tim.js'
+  file 'head.js'
   file 'utils.js'
   file 'events.js'
   file 'bootic_cart.js'
