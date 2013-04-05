@@ -6,7 +6,7 @@
 # - dist/0.0.1/
 # - dist/0.0/
 #
-version '0.0.2'
+version '0.0.3'
 
 # put your development files here
 #
@@ -17,14 +17,14 @@ src_dir './src'
 bundle 'bootic_cart.js' do
   license 'license.txt'
   file 'head.js'
+  # Templating engine
+  # https://github.com/premasagar/tim
+  file 'tim.js'
   file 'utils.js'
   file 'events.js'
   file 'bootic_cart.js'
   file 'html_data_api.js'
   file 'foot.js'
-  # Templating engine
-  # https://github.com/premasagar/tim
-  file 'tim.js'
 end
 
 # Optional post-bundling filter, for example for string substitution

@@ -81,27 +81,32 @@ $.Bootic.ajaxButtons = function () {
     })
 }
 
+// Built-in templating
+// Will detect any template in <script data-template type="text/html"></script> tags
+// Usage:
+//     $.booticTemplateRender('foo_template', data)
+//
+Bootic.templateEngine = tim.parser({start:"%{", end:'}', type:"text/html"})
+Bootic.templates = Bootic.templates || {}; // template cache object
+
+// jQuery plugin to render templates into DOM elements
+// Usage:
+//    $('.cart').booticTemplateRender('some_template', {name: 'foo'})
+
+$.fn.booticTemplateRender = function (templateName, data) {
+  var content = Bootic.templateEngine(Bootic.templates[templateName], data);
+  $(this).empty().append(content)
+  return $(this)
+}
+
 // On page load.
 $(function () {
   
-  // Built-in templating
-  // Will detect any template in <script data-template type="text/html"></script> tags
-  // Usage:
-  //     $.booticTemplateRender('foo_template', data)
-  //
-  Bootic.templateEngine = tim.parser({start:"%{", end:'}', type:"text/html"})
-  Bootic.templates = Bootic.templates || {}; // template cache object
-  
+  // Cache all templates found in the page
   $("script[type='text/html'][data-template]").each(function(){
     var $e = $(this)
     Bootic.templates[$e.data('template')] = $e.html();
   });
-  
-  $.fn.booticTemplateRender = function (templateName, data) {
-    var content = Bootic.templateEngine(Bootic.templates[templateName], data);
-    $(this).empty().append(content)
-    return $(this)
-  }
   
   // Listen to cart changes and upate buttons
   function get(productId) {
