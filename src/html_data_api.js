@@ -50,7 +50,7 @@ $.Bootic.ajaxButtons = function () {
     })
     .on('submit', function (evt) {
       var $e = $(this),
-          variantId = getUniqueValue($e.find('input[name="cart_item[variant_id]"]')),
+          variantId = getUniqueValue($e.find(':input[name="cart_item[variant_id]"]')),
           qtyIput = $e.find('input[name="cart_item[quantity]"]');
       
       if(variantId == undefined) {
