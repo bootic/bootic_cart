@@ -101,19 +101,19 @@ $.fn.booticTemplateRender = function (templateName, data) {
 
 // On page load.
 $(function () {
-  
+
   // Cache all templates found in the page
   $("script[type='text/html'][data-template]").each(function(){
     var $e = $(this)
     Bootic.templates[$e.data('template')] = $e.html();
   });
   Bootic.trigger('templatesLoaded');
-  
+
   // Listen to cart changes and upate buttons
   function get(productId) {
     return $('[data-bootic-productId="'+ productId +'"]')
   }
-  
+
   Bootic.Cart
     .bind('adding', function (evt, item) {
       get(item.product_id).trigger('adding.bootic', [item])
@@ -132,19 +132,28 @@ $(function () {
         get(item.product_id).trigger('added.bootic', [item])
       })
     })
-    
+
+    var prevPadding = $('body').css('paddingTop');
+
     // Update top promo notice
     Bootic.Cart.bind('updated', function () { // Site wide Bootic promotion notice
-      var top = $('#bootic_top_notice')
+      var TOP_NOTICE_SELECTOR = '#bootic_top_notice'
+
+      var top = $(TOP_NOTICE_SELECTOR)
+
       if(top.length == 0) {
         $('body').prepend('<div id="bootic_top_notice"></div>')
       }
       if(Bootic.Cart.hasPromotion) {
-        var h = $('#bootic_top_notice').booticTemplateRender('bootic_top_promo', Bootic.Cart).height()
+        var h = $(TOP_NOTICE_SELECTOR).booticTemplateRender('bootic_top_promo', Bootic.Cart).height()
         $('body').css('paddingTop', (parseInt(h) + 5) + 'px')
         if(Bootic.Cart.invalidPromotion) $('#bootic_top_notice #bootic_top_promo').addClass('bootic_warning')
         else $('#bootic_top_notice #bootic_top_promo').removeClass('bootic_warning')
+        top.show()
+      } else {
+        top.hide()
+        $('body').css('paddingTop', prevPadding);
       }
     })
-  
+
 })

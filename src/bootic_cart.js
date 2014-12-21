@@ -213,6 +213,9 @@ Cart.prototype = {
     this._loaded = true
     this._productCounts = {}
     $.extend(this, cartData)
+    if(cartData.promotion == undefined) {
+      delete this['promotion']
+    }
     this._calculateCounts()
     this._decorateProducts()
     this.hasProducts = !this.isEmpty()
