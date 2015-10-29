@@ -3,31 +3,31 @@
 // Put all non-instance DOM related behaviours in this namespace
 $.Bootic = $.Bootic || {}
 
-// Enable Ajax Buttons. 
+// Enable Ajax Buttons.
 // Clicking on product "add to cart" buttons will add selected product to Ajax cart. No redirect to /cart
 // Usage:
 //     $(function () { $.Bootic.ajaxButtons() })
 //
 $.Bootic.ajaxButtons = function () {
-  
+
   var formSelector = 'form[data-bootic-cart-add]';
-  
+
   // Lets remove quantity field from form. Simpler to click many times or use Ajax cart
   $('input[name="cart_item[quantity]"]').remove()
-  
+
   // If $e is a set of radio buttons get checked one
   function getUniqueValue ($e) {
-    if($e.is(':radio')) 
+    if($e.is(':radio'))
       return $e.filter(':checked').val()
     else
       return $e.val()
   }
-  
+
   // store original value of add-to-cart buttons in a data attribute
   ;(function (e) {
-    $(e).data('org-copy', $(e).find('.submit').val())    
+    $(e).data('org-copy', $(e).find('.submit').val())
   })($(formSelector))
-  
+
   // Add to cart buttons (on product lists and detail)
   // These events are triggered by Bootic.Cart HTML5 API
   $(formSelector)
@@ -52,21 +52,21 @@ $.Bootic.ajaxButtons = function () {
       var $e = $(this),
           variantId = getUniqueValue($e.find(':input[name="cart_item[variant_id]"]')),
           qtyIput = $e.find('input[name="cart_item[quantity]"]');
-      
+
       if(variantId == undefined) {
         evt.preventDefault()
         throw "Your form must have an input of name cart_item[variant_id]"
       }
-      
+
       var options = {
         type: $e.attr('method'),
         url: $e.attr('action'),
         quantity: 1
       }
-      
+
       // We need to trigger the product ID here, because we don't get it from the API until added.
       $e.trigger('adding.bootic', {product_id: $e.data('bootic-cart-add')})
-      
+
       Bootic.Cart.find(variantId, function (item) {
         if(qtyIput.length > 0) { // user is providing quantity
           options.quantity = qtyIput.val()
@@ -75,9 +75,9 @@ $.Bootic.ajaxButtons = function () {
         }
         Bootic.Cart.add(variantId, null, options)
       })
-      
+
       return false
-          
+
     })
 }
 
