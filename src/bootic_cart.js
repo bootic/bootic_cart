@@ -5,10 +5,10 @@ var Cart = function () {
 }
 
 Cart.prototype = {
-  
+
   // Load server cart data
   // -----------------------
-  // 
+  //
   //  Takes:
   //
   // - `fn`: a callback to be run once the server has responded successfully
@@ -18,7 +18,7 @@ Cart.prototype = {
   // - `loading`: before server response
   // - `loaded`: after successfully loaded from server. Updated cart object passed as argument.
   // - `error`: something went wrong with the Ajax request
-  
+
   load: function (fn) {
     this.trigger('loading')
     fn = fn || $.noop
@@ -29,12 +29,12 @@ Cart.prototype = {
     })
     return this
   },
-  
+
   // Reset client-side cart
   // -----------------------
-  // 
+  //
   // Resets product list and totals. Called on instantiation and useful for testing.
-  
+
   reset: function (silent) {
     this.products = []
     this.units = 0
@@ -44,11 +44,12 @@ Cart.prototype = {
     this._productCounts = {};
     this._loaded = false
     this.hasPromotion = false
+    this.hasShipping = false
     this.invalidPromotion = false
     if(silent) this.trigger('reset')
     return this
   },
-  
+
   // Add a product to the cart
   // ---------------------------
   //
@@ -71,28 +72,28 @@ Cart.prototype = {
   // - `adding`: before server response
   // - `added`: after successfully added to server. Added product passed as argument.
   // - `error`: something went wrong with the Ajax request
-   
+
   add: function (variantId, fn, opts) {
     fn = fn || $.noop;
-    
+
     var opts = $.extend({
       url: '/cart/cart_items',
       quantity: 1,
       type: 'post',
       dataType: 'json'
     }, opts || {})
-    
+
     var data = {
       cart_item: {
         variant_id: variantId,
         quantity: opts.quantity
       }
     }
-    
+
     opts.data = data;
-    
+
     //this.trigger('adding', [{variant_id: variantId}]);
-    
+
     this.request(opts.url, opts, function (cartData) {
       this.update(cartData)
        var item = this.find(variantId)
@@ -102,10 +103,10 @@ Cart.prototype = {
 
     return this
   },
-  
+
   // Find a product by variant ID
   // ------------------------------
-  
+
   find: function (variantId, fn) {
     var match = null;
     this.forEach(function (item) {
@@ -116,7 +117,7 @@ Cart.prototype = {
     if(fn) fn(match)
     return match
   },
-  
+
   // Find a product by product ID
   // ------------------------------------------
   findByProductId: function (productId, fn) {
@@ -129,7 +130,7 @@ Cart.prototype = {
     if(fn) fn(match)
     return match
   },
-  
+
   // Loop all products. Emulate JavaScript's forEach
   // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/forEach
   forEach: function (fn, context) {
@@ -141,7 +142,7 @@ Cart.prototype = {
       }
     })
   },
-  
+
   // Remove a product by variant id
   // ------------------------------
   //
@@ -161,10 +162,10 @@ Cart.prototype = {
   // - `removing`: before server response
   // - `removed`: after successfully removed
   // - `error`: something went wrong with the Ajax request
-  
+
   remove: function (variantId, fn, opts) {
     fn = fn || $.noop
-    
+
     return this.loadAndThen(function () {
       var item = this.find(variantId)
       if(!item){this.trigger('error', ["No cart item with variant ID " + variantId]); return this}
@@ -173,7 +174,7 @@ Cart.prototype = {
         url: ('/cart/cart_items/' + item.id),
         type: 'delete'
       }, opts);
-      
+
       this.request(opts.url, opts, function (cartData) {
         this.update(cartData)
         if(this._productCounts[item.product_id]) {// not all variants deleted
@@ -183,14 +184,14 @@ Cart.prototype = {
           fn(item)
           this.trigger('removed', [item])
         }
-        
+
       })
-      
+
     })
   },
-  
+
   // Wrap other function calls in this to make sure the cart is loaded
-  
+
   loadAndThen: function (fn) {
     if(this._loaded) {
       fn.call(this)
@@ -199,16 +200,16 @@ Cart.prototype = {
     }
     return this
   },
-  
+
   // Is the cart empty?
   // -------------------
   isEmpty: function () {
     return !this.products || this.products.length < 1
   },
-  
+
   // Update cart with server response
   // Update unique product counts
-  
+
   update: function (cartData) {
     this._loaded = true
     this._productCounts = {}
@@ -222,6 +223,7 @@ Cart.prototype = {
     this.hasPromotion = this.promotion != undefined
     this.validPromotion = !!(this.promotion && !this.promotion.errors)
     this.invalidPromotion = !!(this.promotion && !this.isEmpty() && this.promotion.errors && this.promotion.errors.length > 0)
+    this.hasShipping = (this.shipping_total != undefined && this.shipping_total > 0)
     this.trigger('updated')
     // Trigger conditional events. Event names cannot match property names
     if(this.hasPromotion){
@@ -230,21 +232,21 @@ Cart.prototype = {
       // Trigger 'new_promotion' only when promotion changes
       var promo_cookie_name = 'bootic_cart_current_promo_name',
           pname = getCookie(promo_cookie_name);
-      
+
       if(this.promotion.name != pname) {
        this._current_promo_name = this.promotion.name
        setCookie(promo_cookie_name, this.promotion.name)
-       this.trigger('new_promotion', [this])  
+       this.trigger('new_promotion', [this])
       }
     }
   },
-  
+
   toString: function (){return 'Bootic.Cart ('+this.products.length+' products)'},
-  
+
   // Issue an Ajax request
   // -----------------------
   //
-  // Takes: 
+  // Takes:
   //
   // - `url`
   // - `opts`: Ajax options object as per jQuery.ajax
@@ -259,14 +261,14 @@ Cart.prototype = {
     }, opts || {})
     return $.ajax(url, opts)
   },
-  
+
   _decorateProducts: function () {
     this.forEach(function (item) {
       item.total_units = this._productCounts[item.product_id]
       item.unavailable = !item.more_available
     })
   },
-  
+
   _calculateCounts: function () {
     $.each(this.products, $.proxy(function (i, item) {
       this._productCounts[item.product_id] = this._productCounts[item.product_id] || 0
